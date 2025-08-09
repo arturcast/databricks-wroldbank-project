@@ -128,41 +128,19 @@ resource "databricks_sql_dashboard" "wb_dashboard" {
 }
 
 resource "databricks_sql_widget" "w_kpi_latest" {
-  dashboard_id = databricks_sql_dashboard.wb_dashboard.id
-  text         = "KPIs último año por país"
-  visualization_options = jsonencode({
-    type = "table"
-  })
-  query_id = databricks_sql_query.kpi_latest.id
-  position = jsonencode({x=0,y=0,w=24,h=10})
+  dashboard_id     = databricks_sql_dashboard.wb_dashboard.id
+  text             = "KPIs último año por país"
+  visualization_id = databricks_sql_query.kpi_latest.visualization[0].id
 }
 
 resource "databricks_sql_widget" "w_ts_population" {
-  dashboard_id = databricks_sql_dashboard.wb_dashboard.id
-  text         = "Población (serie)"
-  visualization_options = jsonencode({
-    type = "lines"
-  })
-  query_id = databricks_sql_query.ts_population.id
-  position = jsonencode({x=0,y=10,w=12,h=12})
+  dashboard_id     = databricks_sql_dashboard.wb_dashboard.id
+  text             = "Población (serie)"
+  visualization_id = databricks_sql_query.ts_population.visualization[0].id
 }
 
 resource "databricks_sql_widget" "w_ts_gdp" {
-  dashboard_id = databricks_sql_dashboard.wb_dashboard.id
-  text         = "PIB USD (serie)"
-  visualization_options = jsonencode({
-    type = "lines"
-  })
-  query_id = databricks_sql_query.ts_gdp.id
-  position = jsonencode({x=12,y=10,w=12,h=12})
-}
-
-resource "databricks_sql_widget" "w_top_gdp_pc" {
-  dashboard_id = databricks_sql_dashboard.wb_dashboard.id
-  text         = "Top 10 PIB per cápita (último año)"
-  visualization_options = jsonencode({
-    type = "bars"
-  })
-  query_id = databricks_sql_query.top_gdp_pc.id
-  position = jsonencode({x=0,y=22,w=24,h=12})
+  dashboard_id     = databricks_sql_dashboard.wb_dashboard.id
+  text             = "PIB USD (serie)"
+  visualization_id = databricks_sql_query.ts_gdp.visualization[0].id
 }
