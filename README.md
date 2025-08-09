@@ -16,12 +16,12 @@ Lakehouse Medallion **serverless** en Databricks con datos en vivo del **Banco M
 
 ```mermaid
 flowchart LR
-  A[World Bank API\nSP.POP.TOTL / NY.GDP.MKTP.CD /\nNY.GDP.PCAP.CD / SP.POP.GROW / NY.GDP.MKTP.KD.ZG]
-    -- JSON crudo --> B[BRONZE\nDelta: bronze_observations]
-  B --> C[SILVER\nAplanado + Tipos + Validación\nDelta: silver_observations]
-  C --> D[GOLD\nKPIs y métricas\nDelta: gold_country_year_metrics]
-  D --> E[Consumidores\nDashboards/SQL/BI (Lakeview)]
-  D --> F[KPIs Último Año\nDelta: gold_kpis_latest]
+  A[World Bank API<br/>SP.POP.TOTL / NY.GDP.MKTP.CD <br/> NY.GDP.PCAP.CD / SP.POP.GROW / NY.GDP.MKTP.KD.ZG]
+  A -->|JSON crudo| B[BRONZE<br/>Delta: bronze_observations]
+  B --> C[SILVER<br/>Aplanado + Tipos + Validación<br/>Delta: silver_observations]
+  C --> D[GOLD<br/>KPIs y métricas<br/>Delta: gold_country_year_metrics]
+  D --> E[Consumidores<br/>Dashboards/SQL/BI (Lakeview)]
+  D --> F[KPIs Último Año<br/>Delta: gold_kpis_latest]
 ```
 
 ## Tablas publicadas
