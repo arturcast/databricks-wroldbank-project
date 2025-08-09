@@ -64,10 +64,6 @@ resource "databricks_job" "worldbank" {
   }
 }
 
-output "job_id" {
-  value = databricks_job.worldbank.id
-}
-
 # --------------------
 # DASHBOARD (SQL)
 # --------------------
