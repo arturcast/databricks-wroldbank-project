@@ -1,0 +1,58 @@
+name: databricks-pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+concurrency:
+  group: databricks-worldbank-pipeline
+  cancel-in-progress: false
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: terraform
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          TF_VAR_repo_url: ${{ vars.TF_VAR_repo_url }}
+          TF_VAR_repo_branch: ${{ vars.TF_VAR_repo_branch }}
+          TF_VAR_sql_warehouse_name: ${{ vars.TF_VAR_sql_warehouse_name }}
+          TF_VAR_cron_time_bogota: ${{ vars.TF_VAR_cron_time_bogota }}
+        run: terraform apply -auto-approve
+
+      - name: Export Outputs
+        id: tfout
+        working-directory: terraform
+        run: |
+          echo "JOB_ID=$(terraform output -raw job_id)" >> $GITHUB_OUTPUT
+
+  run-job:
+    needs: terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Databricks CLI (unified)
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+          databricks -v
+
+      - name: Run Job Now (secuencial dentro del job)
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        run: |
+          JOB_ID='${{ needs.terraform.outputs.JOB_ID }}'
+          databricks jobs run-now --job-id "$JOB_ID" --wait
