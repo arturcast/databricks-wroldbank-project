@@ -20,10 +20,4 @@
    - **Databricks SQL Dashboard** (Lakeview clásico) enlazado a tu Warehouse.
 3. El workflow también ejecutará el Job una vez (Run Now) tras crear la infra.
 
-## Notas del Dashboard
-- El Terraform hace `databricks_sql_query` + `databricks_sql_dashboard` + `databricks_sql_widget`.
-- Si tu Warehouse no se llama **Starter Warehouse**, ajusta `TF_VAR_sql_warehouse_name`.
-- El dashboard incluye:
-  - KPI último año por país.
-  - Series de tiempo de Población y PIB.
-  - Top 10 PIB per cápita último año.
+

@@ -32,7 +32,7 @@ flowchart LR
 
 ## Despliegue rápido
 1) En tu repo GitHub, define secretos: `DATABRICKS_HOST`, `DATABRICKS_TOKEN`  
-2) Variables (opcional): `TF_VAR_repo_url`, `TF_VAR_repo_branch`, `TF_VAR_sql_warehouse_name` (por defecto: **Starter Warehouse**).
+2) Variables (opcional): `TF_VAR_repo_url`, `TF_VAR_repo_branch`.
 3) Ejecuta el workflow **databricks-pipeline** (Terraform + Run Now).
 4) Terraform crea el **Job** (schedule diario 02:00 America/Bogota) y un **Databricks SQL Dashboard** básico.
 

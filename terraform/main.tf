@@ -11,10 +11,13 @@ provider "databricks" {}
 
 locals {
   indicators_csv = join(",", var.indicators)
-  cron_hour      = tonumber(split(var.cron_time_bogota, ":")[0])
-  cron_minute    = tonumber(split(var.cron_time_bogota, ":")[1])
-  # Quartz: sec min hour day-of-month month day-of-week ? for daily: 0 MM HH * * ?
-  quartz_expr    = "0 ${local.cron_minute} ${local.cron_hour} * * ?"
+
+  # var.cron_time_bogota viene en formato "HH:MM", ej: "02:00"
+  cron_hour   = tonumber(element(split(":", var.cron_time_bogota), 0))
+  cron_minute = tonumber(element(split(":", var.cron_time_bogota), 1))
+
+  # Quartz: sec min hour day-of-month month day-of-week ?  → diario
+  quartz_expr = "0 ${local.cron_minute} ${local.cron_hour} * * ?"
 }
 
 # --------------------

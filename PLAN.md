@@ -40,10 +40,7 @@ Construir un pipeline de Data Engineering en Databricks (Free Edition, serverles
 - [ ] KPIs: crecimiento poblacional anual, crecimiento PIB, PIB per cápita (preferencia indicador; fallback cálculo).
 - [ ] Tablas `gold_country_year_metrics` y `gold_kpis_latest`.
 
-### Fase 5 — Dashboard
-- [ ] Crear **Databricks SQL Dashboard** vía Terraform:
-  - Queries sobre tablas GOLD.
-  - Widgets: KPIs último año, series de tiempo.
+
 
 ### Fase 6 — Pruebas
 - [ ] `pytest` sobre funciones puras y (opcional) transformaciones con Spark local.

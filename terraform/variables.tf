@@ -25,11 +25,7 @@ variable "indicators" {
   type        = list(string)
   default     = ["SP.POP.TOTL","NY.GDP.MKTP.CD","NY.GDP.PCAP.CD","SP.POP.GROW","NY.GDP.MKTP.KD.ZG"]
 }
-variable "sql_warehouse_name" {
-  description = "Nombre del SQL Warehouse para el dashboard"
-  type        = string
-  default     = "Starter Warehouse"
-}
+
 variable "cron_time_bogota" {
   description = "Hora de ejecución diaria (America/Bogota) en formato HH:MM (24h)"
   type        = string

@@ -3,7 +3,7 @@
 Incluye:
 - Ingesta de API (población, PIB, PIB per cápita, crecimientos %)
 - Arquitectura **Medallion** (Bronze/Silver/Gold)
-- **Terraform** para Jobs + Dashboard (Lakeview)
+- **Terraform** para Jobs
 - **Schedule diario** a las 02:00 (America/Bogota)
 - CI/CD con **GitHub Actions**
 
