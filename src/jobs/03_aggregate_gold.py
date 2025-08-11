@@ -32,8 +32,10 @@ def main():
     # PIB per cápita: preferir indicador; fallback cálculo
     pivot = pivot.withColumn(
         "gdp_per_capita",
-        F.when(F.col("gdp_per_capita_ind").isNotNull(), F.col("gdp_per_capita_ind")) \         .when((F.col("gdp_current_usd").isNotNull()) & (F.col("population_total") > 0),
-               F.col("gdp_current_usd") / F.col("population_total")) \         .otherwise(F.lit(None))
+        F.when(F.col("gdp_per_capita_ind").isNotNull(), F.col("gdp_per_capita_ind")) \
+            .when((F.col("gdp_current_usd").isNotNull()) & (F.col("population_total") > 0),
+               F.col("gdp_current_usd") / F.col("population_total")) \
+                .otherwise(F.lit(None))
     )
 
     # Crecimientos interanuales calculados (fallback)
