@@ -7,17 +7,17 @@ terraform {
   }
 }
 
-# El provider toma DATABRICKS_HOST y DATABRICKS_TOKEN desde el entorno (GitHub Actions)
+# El provider usa DATABRICKS_HOST y DATABRICKS_TOKEN desde el entorno (Actions)
 provider "databricks" {}
 
 locals {
   indicators_csv = join(",", var.indicators)
 
-  # var.cron_time_bogota viene "HH:MM" (ej. "02:00")
+  # var.cron_time_bogota en formato "HH:MM" (ej. "02:00")
   cron_hour   = tonumber(element(split(":", var.cron_time_bogota), 0))
   cron_minute = tonumber(element(split(":", var.cron_time_bogota), 1))
 
-  # Quartz: sec min hour day-of-month month day-of-week ?  -> diario
+  # Quartz: sec min hour dom mes dow ?  -> diario
   quartz_expr = "0 ${local.cron_minute} ${local.cron_hour} * * ?"
 }
 
@@ -37,14 +37,12 @@ resource "databricks_job" "worldbank" {
     pause_status           = "UNPAUSED"
   }
 
-  # Environment serverless (requerido para spark_python_task en serverless)
+  # Environment serverless (solo 'client', sin environment_version)
   environment {
     environment_key = "srvless"
     spec {
-      client              = "serverless"
-      # Usa "2" si tu workspace aún no soporta la v3
-      environment_version = "2"
-      # dependencies        = []    # opcional
+      client = "serverless"
+      # dependencies = []   # opcional
     }
   }
 
