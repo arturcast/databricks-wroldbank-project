@@ -8,7 +8,10 @@ from src.common.config import (
 from src.common.utils import fetch_worldbank_indicator
 
 def ensure_schema(spark):
-    spark.sql(f"CREATE DATABASE IF NOT EXISTS {CATALOG}.{SCHEMA}")
+    # Unity Catalog
+    spark.sql(f"USE CATALOG {CATALOG}")
+    spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.{SCHEMA}")
+    spark.sql(f"USE {CATALOG}.{SCHEMA}")
 
 def main(indicators, start_year, end_year):
     spark = SparkSession.builder.appName("wb-bronze-ingestion").getOrCreate()

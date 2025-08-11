@@ -5,7 +5,9 @@ from src.common.utils import compute_yoy_growth
 
 def main():
     spark = SparkSession.builder.appName("wb-gold-aggregate").getOrCreate()
-    spark.sql(f"CREATE DATABASE IF NOT EXISTS {CATALOG}.{SCHEMA}")
+    spark.sql(f"USE CATALOG {CATALOG}")
+    spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.{SCHEMA}")
+    spark.sql(f"USE {CATALOG}.{SCHEMA}")
     df = spark.table(TABLE_SILVER)
 
     # Pivot indicadores a columnas

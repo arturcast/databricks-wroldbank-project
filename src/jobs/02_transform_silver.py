@@ -23,7 +23,9 @@ schema_obs = StructType([
 
 def main():
     spark = SparkSession.builder.appName("wb-silver-transform").getOrCreate()
-    spark.sql(f"CREATE DATABASE IF NOT EXISTS {CATALOG}.{SCHEMA}")
+    spark.sql(f"USE CATALOG {CATALOG}")
+    spark.sql(f"CREATE SCHEMA IF NOT EXISTS {CATALOG}.{SCHEMA}")
+    spark.sql(f"USE {CATALOG}.{SCHEMA}")
     bronze = spark.table(TABLE_BRONZE)
     parsed = bronze.select(
         F.from_json(F.col("payload"), schema_obs).alias("j"),
