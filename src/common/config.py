@@ -10,7 +10,7 @@ CURRENT_YEAR = datetime.utcnow().year
 START_YEAR = int(os.getenv("START_YEAR", CURRENT_YEAR - 30))
 END_YEAR = int(os.getenv("END_YEAR", CURRENT_YEAR - 1))
 
-CATALOG = os.getenv("CATALOG", "main")
+CATALOG = os.getenv("CATALOG", "workspace")
 SCHEMA = os.getenv("SCHEMA", "worldbank_demo")
 
 TABLE_BRONZE = f"{CATALOG}.{SCHEMA}.bronze_observations"
