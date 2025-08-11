@@ -41,8 +41,7 @@ resource "databricks_job" "worldbank" {
   environment {
     environment_key = "srvless"
     spec {
-      client = "serverless"
-      # dependencies = []   # opcional
+      environment_version = "3"   # si falla, prueba "2"
     }
   }
 
