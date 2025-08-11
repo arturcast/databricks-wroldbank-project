@@ -1,31 +1,29 @@
 terraform {
-  required_version = ">= 1.3.0"
   required_providers {
     databricks = {
       source  = "databricks/databricks"
-      version = "1.44.0"
+      version = "~> 1.84.0"
     }
   }
 }
 
-provider "databricks" {
-  host  = var.databricks_host
-  token = var.databricks_token
-}
+# El provider toma DATABRICKS_HOST y DATABRICKS_TOKEN del entorno (GitHub Actions)
+provider "databricks" {}
 
 locals {
   indicators_csv = join(",", var.indicators)
 
-  # var.cron_time_bogota viene en formato "HH:MM", ej: "02:00"
+  # var.cron_time_bogota viene "HH:MM" (ej: "02:00")
   cron_hour   = tonumber(element(split(":", var.cron_time_bogota), 0))
   cron_minute = tonumber(element(split(":", var.cron_time_bogota), 1))
 
-  # Quartz cron expression: sec min hour day-of-month month day-of-week ?
+  # Quartz: sec min hour day-of-month month day-of-week ?  (diario)
   quartz_expr = "0 ${local.cron_minute} ${local.cron_hour} * * ?"
 }
 
 resource "databricks_job" "worldbank" {
-  name = "worldbank-medallion-serverless"
+  name                = var.job_name
+  max_concurrent_runs = 1
 
   git_source {
     url      = var.repo_url
@@ -39,12 +37,12 @@ resource "databricks_job" "worldbank" {
     pause_status           = "UNPAUSED"
   }
 
-  # Declaración de environment serverless
+  # Declaración de environment serverless (requerido para Python tasks en serverless)
   environments {
     environment_key = "srvless"
     spec = jsonencode({
       client              = "serverless"
-      environment_version = "3"
+      environment_version = "3"   # si tu workspace no soporta v3, cambia a "2"
     })
   }
 
@@ -57,7 +55,7 @@ resource "databricks_job" "worldbank" {
       python_file = "src/jobs/01_ingestion_bronze.py"
       parameters  = [
         "--start-year", tostring(var.start_year),
-        "--end-year", tostring(var.end_year),
+        "--end-year",   tostring(var.end_year),
         "--indicators", local.indicators_csv
       ]
     }
@@ -65,10 +63,8 @@ resource "databricks_job" "worldbank" {
 
   task {
     task_key        = "silver_transform"
-    depends_on {
-      task_key = "bronze_ingestion"
-    }
     environment_key = "srvless"
+    depends_on { task_key = "bronze_ingestion" }
 
     spark_python_task {
       source      = "GIT"
@@ -78,10 +74,8 @@ resource "databricks_job" "worldbank" {
 
   task {
     task_key        = "gold_aggregate"
-    depends_on {
-      task_key = "silver_transform"
-    }
     environment_key = "srvless"
+    depends_on { task_key = "silver_transform" }
 
     spark_python_task {
       source      = "GIT"
