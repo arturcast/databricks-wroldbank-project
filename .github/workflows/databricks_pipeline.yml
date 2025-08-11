@@ -61,4 +61,7 @@ jobs:
             exit 1
           fi
           # 'run-now' espera el id como argumento POSICIONAL (no --job-id)
-          databricks jobs run-now "$JOB_ID" --wait
+          databricks jobs run-now "$JOB_ID" --timeout 3600 || {
+            echo "Error al ejecutar el job $JOB_ID"
+            exit 1
+          }
