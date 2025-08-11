@@ -48,7 +48,10 @@ def main():
     )
     is_valid_iso3 = F.udf(lambda x: bool(valid_country_iso3(x)), BooleanType())
     is_valid_year = F.udf(lambda x: bool(valid_year(x)), BooleanType())
-    clean = flat.where(is_valid_iso3(F.col("country_iso3")) & is_valid_year(F.col("year_str"))) \                .withColumn("year", F.col("year_str").cast(IntegerType())) \                .drop("year_str") \                .dropDuplicates(["indicator_id","country_iso3","year"])
+    clean = flat.where(is_valid_iso3(F.col("country_iso3")) & is_valid_year(F.col("year_str"))) \
+        .withColumn("year", F.col("year_str").cast(IntegerType())) \
+            .drop("year_str") \
+                .dropDuplicates(["indicator_id","country_iso3","year"])
     spark.sql(f"""
       CREATE TABLE IF NOT EXISTS {TABLE_SILVER} (
         indicator_id STRING,
