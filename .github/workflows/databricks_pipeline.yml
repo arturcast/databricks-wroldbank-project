@@ -12,6 +12,8 @@ concurrency:
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    outputs:
+      job_id: ${{ steps.tfout.outputs.job_id }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,7 +32,6 @@ jobs:
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
           TF_VAR_repo_url: ${{ vars.TF_VAR_repo_url }}
           TF_VAR_repo_branch: ${{ vars.TF_VAR_repo_branch }}
-          TF_VAR_sql_warehouse_name: ${{ vars.TF_VAR_sql_warehouse_name }}
           TF_VAR_cron_time_bogota: ${{ vars.TF_VAR_cron_time_bogota }}
         run: terraform apply -auto-approve
 
@@ -38,13 +39,13 @@ jobs:
         id: tfout
         working-directory: terraform
         run: |
-          echo "JOB_ID=$(terraform output -raw job_id)" >> $GITHUB_OUTPUT
+          echo "job_id=$(terraform output -raw job_id)" >> "$GITHUB_OUTPUT"
 
   run-job:
     needs: terraform
     runs-on: ubuntu-latest
     steps:
-      - name: Install Databricks CLI (unified)
+      - name: Install Databricks CLI
         run: |
           curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
           databricks -v
@@ -54,5 +55,10 @@ jobs:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
         run: |
-          JOB_ID='${{ needs.terraform.outputs.JOB_ID }}'
-          databricks jobs run-now --job-id "$JOB_ID" --wait
+          JOB_ID='${{ needs.terraform.outputs.job_id }}'
+          if [ -z "$JOB_ID" ]; then
+            echo "JOB_ID vacío. Revisa el job 'terraform' y sus outputs."
+            exit 1
+          fi
+          # 'run-now' espera el id como argumento POSICIONAL (no --job-id)
+          databricks jobs run-now "$JOB_ID" --wait
