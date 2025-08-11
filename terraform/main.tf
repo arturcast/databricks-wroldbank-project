@@ -1,13 +1,17 @@
 terraform {
+  required_version = ">= 1.3.0"
   required_providers {
     databricks = {
       source  = "databricks/databricks"
-      version = "~> 1.84.0"
+      version = "1.44.0"
     }
   }
 }
 
-provider "databricks" {}
+provider "databricks" {
+  host  = var.databricks_host
+  token = var.databricks_token
+}
 
 locals {
   indicators_csv = join(",", var.indicators)
@@ -16,16 +20,12 @@ locals {
   cron_hour   = tonumber(element(split(":", var.cron_time_bogota), 0))
   cron_minute = tonumber(element(split(":", var.cron_time_bogota), 1))
 
-  # Quartz: sec min hour day-of-month month day-of-week ?  → diario
+  # Quartz cron expression: sec min hour day-of-month month day-of-week ?
   quartz_expr = "0 ${local.cron_minute} ${local.cron_hour} * * ?"
 }
 
-# --------------------
-# JOB con schedule diario
-# --------------------
 resource "databricks_job" "worldbank" {
-  name                 = var.job_name
-  max_concurrent_runs  = 1
+  name = "worldbank-medallion-serverless"
 
   git_source {
     url      = var.repo_url
@@ -39,18 +39,37 @@ resource "databricks_job" "worldbank" {
     pause_status           = "UNPAUSED"
   }
 
+  # Declaración de environment serverless
+  environments {
+    environment_key = "srvless"
+    spec = jsonencode({
+      client              = "serverless"
+      environment_version = "3"
+    })
+  }
+
   task {
-    task_key = "bronze_ingestion"
+    task_key        = "bronze_ingestion"
+    environment_key = "srvless"
+
     spark_python_task {
       source      = "GIT"
       python_file = "src/jobs/01_ingestion_bronze.py"
-      parameters  = ["--start-year", tostring(var.start_year), "--end-year", tostring(var.end_year), "--indicators", local.indicators_csv]
+      parameters  = [
+        "--start-year", tostring(var.start_year),
+        "--end-year", tostring(var.end_year),
+        "--indicators", local.indicators_csv
+      ]
     }
   }
 
   task {
-    task_key = "silver_transform"
-    depends_on { task_key = "bronze_ingestion" }
+    task_key        = "silver_transform"
+    depends_on {
+      task_key = "bronze_ingestion"
+    }
+    environment_key = "srvless"
+
     spark_python_task {
       source      = "GIT"
       python_file = "src/jobs/02_transform_silver.py"
@@ -58,11 +77,20 @@ resource "databricks_job" "worldbank" {
   }
 
   task {
-    task_key = "gold_aggregate"
-    depends_on { task_key = "silver_transform" }
+    task_key        = "gold_aggregate"
+    depends_on {
+      task_key = "silver_transform"
+    }
+    environment_key = "srvless"
+
     spark_python_task {
       source      = "GIT"
       python_file = "src/jobs/03_aggregate_gold.py"
     }
   }
+}
+
+output "job_id" {
+  description = "ID del job creado"
+  value       = databricks_job.worldbank.id
 }
